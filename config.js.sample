@@ -1,6 +1,7 @@
 const config = {};
 
 config.port = 3050;
-config.connection_string = 'mongodb+srv://challengeUser:WUMglwNBaydH8Yvu@challenge-xzwqd.mongodb.net/getir-challenge-test';
+config.connection_string = 'mongodb+srv://challengeUser:WUMglwNBaydH8Yvu@challenge-xzwqd.mongodb.net';
+config.db_name = 'getir-case-study';
 
 export default config;
