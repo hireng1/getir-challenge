@@ -1,6 +1,7 @@
 import ResultInterface from './result-interface.js';
 import RecordDto from '../dto/record.js';
 import MongoHelper from './helper.js';
+import config from '../config.js';
 
 export default class ResultMongoDao extends ResultInterface {
   static queryAndMap(client, dbName, collection, pipeline) {
@@ -61,9 +62,6 @@ export default class ResultMongoDao extends ResultInterface {
 
     // console.log('Firing query..');
     // throw new Error('Error from DAO Mongo');
-    return ResultMongoDao.queryAndMap(MongoHelper.mongoClient, 'getir-case-study', 'records', pipeline);
-    // console.log('Query complete..');
-    // console.log(records);
-    // return records;
+    return ResultMongoDao.queryAndMap(MongoHelper.mongoClient, config.db_name, 'records', pipeline);
   }
 }

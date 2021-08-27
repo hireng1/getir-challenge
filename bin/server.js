@@ -8,7 +8,7 @@ import MongoHelper from '../dao/helper.js';
 
 console.log('Checking DB Connection..');
 
-await MongoHelper.dbCheck();
+await MongoHelper.connectMongoDB();
 /**
  * Get port from environment and store in Express.
  */
