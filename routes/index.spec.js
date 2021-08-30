@@ -1,19 +1,22 @@
 import { expect, it } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
-import MongoHelper from '../dao/helper.js';
-import ErrorDTO from '../dto/errorDTO.js';
+import MongoHelper from '../dao/mongo_helper';
+import ChallengeErrorDTO from '../dto/challenge_error_dto';
 
+// Mandatory DB connection before starting all tests
 beforeAll(async () => { await MongoHelper.connectMongoDB(); });
 
-afterAll(async () => { await MongoHelper.disconnectDB(); });
+// Disconnecting DB after all tests have been run successfully
+afterAll(async () => { await MongoHelper.disconnectMongoDB(); });
 
+// Unit tests for Controlle
 describe('Index Controller tests', () => {
   it('Unit Test 1:: Check for HTTP GET is blocked', async () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(405);
     expect(res.body).toEqual(expect.objectContaining(
-      new ErrorDTO(1003, 'This HTTP method is currently not supported. Kindly refer to the API Documentation')
+      new ChallengeErrorDTO(1003, 'This HTTP method is currently not supported. Kindly refer to the API Documentation')
       )
     );
   });
@@ -29,7 +32,7 @@ describe('Index Controller tests', () => {
     expect(res.status).toBe(404);
     expect(res.body).toEqual(
       expect.objectContaining(
-        new ErrorDTO(1001, 'ERROR:: Query returned an empty Result Set')
+        new ChallengeErrorDTO(1001, 'ERROR:: Query returned an empty Result Set')
         )
       );
   });
@@ -41,7 +44,7 @@ describe('Index Controller tests', () => {
     expect(res.status).toBe(400);
     expect(res.body).toEqual(
       expect.objectContaining(
-        new ErrorDTO(1002, 'ERROR:: Bad request, Validation errors detected [DEBUG Info :Error with field startDate: \
+        new ChallengeErrorDTO(1002, 'ERROR:: Bad request, Validation errors detected [DEBUG Info :Error with field startDate: \
 startDate must be in a YYYY-MM-DD format,Error with field endDate: endDate must be in a YYYY-MM-DD format,Error with \
 field maxCount: maxCount must be a Valid Number,Error with field minCount: minCount must be a Valid Number]')
       )
@@ -59,12 +62,13 @@ field maxCount: maxCount must be a Valid Number,Error with field minCount: minCo
     expect(res.status).toBe(400);
     expect(res.body).toEqual(
       expect.objectContaining(
-        new ErrorDTO(1002, 'ERROR:: Bad request, Validation errors detected [DEBUG Info :Error with field startDate: startDate must be in a YYYY-MM-DD format]')
+        new ChallengeErrorDTO(1002, 'ERROR:: Bad request, Validation errors detected [DEBUG Info :Error with field startDate: startDate must be in a YYYY-MM-DD format]')
       )
     );
   });
 
-  // Test with Incorrect End date, minCount, maxCount excluded to avoid recurring test cases
+  // Tests with Incorrect End date, minCount, maxCount 
+  // have been excluded to avoid recurring test cases
 
   it('Unit Test 5:: Test with All correct parameters for a 200', async() => {
     const res = await request(app)
@@ -76,4 +80,5 @@ field maxCount: maxCount must be a Valid Number,Error with field minCount: minCo
       maxCount: 3000});
     expect(res.status).toBe(200);
   });
+
 });

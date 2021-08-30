@@ -1,6 +1,6 @@
 const config = {};
 
-config.port = 3050;
+config.port = 3000;
 config.connection_string = '';
 config.db_name = 'getir-case-study';
 

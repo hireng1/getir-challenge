@@ -4,9 +4,13 @@
 import { createServer } from 'http';
 import config from '../config.js';
 import app from '../app.js';
-import MongoHelper from '../dao/helper.js';
+import MongoHelper from '../dao/mongo_helper.js';
 
 console.log('Checking DB Connection..');
+
+/**
+ * Test the MongoDb database before listening onto the designated port
+ */
 
 await MongoHelper.connectMongoDB();
 /**

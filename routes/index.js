@@ -1,13 +1,16 @@
 import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
-import QueryDto from '../dto/query.js';
-import DataService from '../services/get-data.js';
-import ResultMongoDao from '../dao/result-mongo-dao.js';
-import ErrorDTO from '../dto/errorDTO.js';
-import RecordDetail from '../dto/recordDetail.js';
+import ChallengeQueryDTO from '../dto/challenge_query_dto.js';
+import ChallengeService from '../services/challenge_service.js';
+import ChallengeMongoDAO from '../dao/challenge_mongo_dao.js';
+import ChallengeErrorDTO from '../dto/challenge_error_dto.js';
+import ChallengeResultDTO from '../dto/challenge_result_dto.js';
 
 const router = Router();
 
+/**
+ * Mandatory validations for input fields
+ */
 const validations = () => [
   body('startDate')
     .isDate({ format: 'YYYY-MM-DD' })
@@ -24,31 +27,40 @@ const validations = () => [
 ];
 
 router.get('/', (req, res) => {
-  res.status(405).json(new ErrorDTO(1003, 'This HTTP method is currently not supported. Kindly refer to the API Documentation'));
+  res.status(405).json(new ChallengeErrorDTO(1003, 'This HTTP method is currently not supported. Kindly refer to the API Documentation'));
 });
 
 router.post('/', validations(),  (req, res) => {
     const errorFormatter = ({ msg, param }) => `Error with field ${param}: ${msg}`;
+    // Carry out validations and respond to request in case of errors
     const errors = validationResult(req).formatWith(errorFormatter);
     if (!errors.isEmpty()) {
-      return res.status(400).json(new ErrorDTO(1002, `ERROR:: Bad request, Validation errors detected [DEBUG Info :${errors.array()}]`));
+      return res.status(400).json(new ChallengeErrorDTO(1002, `ERROR:: Bad request, Validation errors detected [DEBUG Info :${errors.array()}]`));
     }
+    // Unpacking the request object
     const {
       startDate, endDate, minCount, maxCount,
     } = req.body;
 
     // TODO: Make singleton by adding static method
-    const service = new DataService(new ResultMongoDao());
-    return service.getData(new QueryDto(startDate, endDate, maxCount, minCount))
+    // Instantiating the Service object with an instance of 
+    // ChallengeMongoDAO which is has been extended from the  
+    // ChallengeInterface class
+    const service = new ChallengeService(new ChallengeMongoDAO());
+    return service.getData(new ChallengeQueryDTO(startDate, endDate, maxCount, minCount))
       .then((records) => {
         if (records.length === 0) {
-          res.status(404).json(new ErrorDTO(1001, 'ERROR:: Query returned an empty Result Set'));
+          // Empty record set throws a 404
+          res.status(404).json(new ChallengeErrorDTO(1001, 'ERROR:: Query returned an empty Result Set'));
         } else {
-          res.status(200).json(new RecordDetail(0, 'Success', records));
-          // res.status(200).json({ code: '0', msg: 'Success', records });
+          // Yay, we found some results
+          res.status(200).json(new ChallengeResultDTO(0, 'Success', records));
         }
       })
-      .catch((err) => res.status(500).json(new ErrorDTO(1000, `ERROR:: Error while pulling up records [DEBUG Info :${err.message}]`)));
+      // Possible error while executing query are responded with the error 
+      // message, any & all upstream errors from Service & DAO are flown in here
+      .catch((err) => res.status(500).json(new ChallengeErrorDTO(1000,
+         `ERROR:: Error while pulling up records [DEBUG Info :${err.message}]`)));
   });
 
 export default router;

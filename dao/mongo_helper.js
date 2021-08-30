@@ -9,6 +9,9 @@ export default class MongoHelper {
         // Connection already established, need not create a new one
         return;
       }
+      /* 
+       * Mandatory config file validations for connection string and database name
+       */
       if (!Object.prototype.hasOwnProperty.call(config, 'connection_string') || config.connection_string === '') {
         console.log('ERROR:: No Connection String specified! Please update the correct connection string in config.js and restart the application');
         process.exit(1);
@@ -18,6 +21,10 @@ export default class MongoHelper {
         process.exit(1);
       }
 
+      /* 
+       * Actual connection is established here, if there's an error
+       * with the given settings, the program will exit gracefully
+       */
       try {
         const client = new MongoClient(config.connection_string, {
           useNewUrlParser: true,
@@ -33,7 +40,12 @@ export default class MongoHelper {
       }
     }
 
-    static async disconnectDB() {
+    /*
+    * Below piece of code has been added to support disconnection
+    * after test cases have been executed
+    */
+
+    static async disconnectMongoDB() {
       if (MongoHelper.mongoClient === '') {
         return;
       }
